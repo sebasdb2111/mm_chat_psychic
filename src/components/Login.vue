@@ -1,17 +1,30 @@
 <template>
 	<q-form @submit="submitForm">
-		<q-input
-			v-model="formData.email"
-			class="q-mb-md"
-			outlined
-			type="email"
-			label="Email" />
-		<q-input
-			v-model="formData.password"
-			class="q-mb-md"
-			outlined
-			type="password"
-			label="Password" />
+    <q-input
+      v-model="formData.email"
+      class="q-mb-md"
+      outlined
+      type="email"
+      lazy-rules
+      :rules="[val => (val !== null && val !== '') || 'Please type your email']"
+      label="Email" />
+    <q-input
+      color="teal"
+      outlined
+      v-model="formData.password"
+      label="Password"
+      lazy-rules
+      :rules="[val => (val !== null && val !== '') || 'Please type your password']"
+      :type="isPwd ? 'password' : 'text'"
+    >
+      <template v-slot:append>
+        <q-icon
+          :name="isPwd ? 'visibility_off' : 'visibility'"
+          class="cursor-pointer"
+          @click="isPwd = !isPwd"
+        />
+      </template>
+    </q-input>
     <div class="row">
       <q-space />
       <div class="row justify-end">
@@ -30,7 +43,7 @@
 		props: ['tab'],
 		data() {
 			return {
-        // loading: !(!this.formData.email || !this.formData.password),
+        isPwd: true,
 				formData: {
 					email: null,
 					password: null
@@ -40,18 +53,15 @@
 		methods: {
 			...mapActions('auth', ['login']),
       ...mapActions('psychic', ['currentPsychic']),
-      ...mapActions('chatSession', ['chatSessions']),
       ...mapGetters('auth', ['loggedIn', 'psychic']),
-			submitForm() {
-        this.login(this.formData);
-        const psychicLoggedIn = this.loggedIn();
-        const psychic = this.psychic();
+      async submitForm() {
+        await this.login(this.formData);
+        const psychicLoggedIn = await this.loggedIn();
+        const psychic = await this.psychic;
 
         if (psychicLoggedIn && psychic) {
-          console.log('11111111111', )
-          this.currentPsychic({ token: response.data });
-              this.chatSessions();
-              this.$router.push('/');
+          await this.currentPsychic({ token: psychic.data });
+          this.$router.push('/');
         }
         else {
           this.$q.notify({
@@ -62,33 +72,6 @@
               'Something went wrong, please try again'
           });
         }
-        // const
-          // .then((response) => {
-          //   console.log('SUBMIT', response)
-          //   if (response) {
-          //     this.currentPsychic({ token: response.data });
-          //     this.chatSessions();
-          //     this.$router.push('/');
-          //   }
-          //   else {
-          //     this.$q.notify({
-          //       color: 'red-5',
-          //       textColor: 'white',
-          //       icon: 'warning',
-          //       message:
-          //         'Something went wrong, please try again'
-          //     });
-          //   }
-          // })
-          // .catch(() => {
-          //   this.$q.notify({
-          //     color: 'red-5',
-          //     textColor: 'white',
-          //     icon: 'warning',
-          //     message:
-          //       'Something went wrong, please try again'
-          //   });
-          // });
 			}
 		}
 	}

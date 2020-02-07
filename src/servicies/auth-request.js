@@ -13,7 +13,6 @@ class AuthService {
             });
     }
     logoutPsychic() {
-      console.log('borra token')
         localStorage.removeItem('psychicToken');
     }
 }

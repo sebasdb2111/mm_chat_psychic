@@ -175,7 +175,6 @@
 	  watch: {
       conversation: function(val) {
         const conversation = this.mountConversation(val.data);
-        console.log(conversation)
         if (Object.keys(conversation).length) {
 	  			this.scrollToBottom()
 	  			setTimeout(() => {

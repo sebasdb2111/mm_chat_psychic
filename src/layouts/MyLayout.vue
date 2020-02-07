@@ -39,18 +39,18 @@
     </q-header>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex';
+  import {mapActions, mapGetters} from 'vuex';
 
   export default {
     computed: {
       isLogged() {
-          return this.loggedIn();
+        return this.loggedIn();
       }
     },
     methods: {
