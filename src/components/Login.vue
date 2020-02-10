@@ -53,6 +53,7 @@
 		methods: {
 			...mapActions('auth', ['login']),
       ...mapActions('psychic', ['currentPsychic']),
+      ...mapGetters('psychic', ['psychicData']),
       ...mapGetters('auth', ['loggedIn', 'psychic']),
       async submitForm() {
         await this.login(this.formData);
@@ -61,6 +62,9 @@
 
         if (psychicLoggedIn && psychic) {
           await this.currentPsychic({ token: psychic.data });
+          const psychicData = await this.psychicData();
+
+          this.$socket.client.emit('psychic_online', psychicData);
           this.$router.push('/');
         }
         else {

@@ -20,6 +20,18 @@ export const chatSession = {
                 }
             );
         },
+      getChatSession({ commit }, chatSessionId) {
+        return ChatSessionService.chatSession(chatSessionId).then(
+          chatSession => {
+            commit('chatSession', chatSession);
+            return chatSession;
+          },
+          error => {
+            commit('chatSessionNotFound');
+            return error;
+          }
+        );
+      },
         getConversation({ commit }, chatSessionId) {
             return ChatSessionService.getConversation(chatSessionId).then(
                 conversation => {
@@ -46,6 +58,12 @@ export const chatSession = {
         }
     },
     mutations: {
+        chatSession(state, chatSession) {
+          state.chatSessionData = chatSession;
+        },
+        chatSessionNotFound(state) {
+          state.chatSessionData = null;
+        },
         chatSessions(state, chatSessions) {
             state.chatSessionList = chatSessions;
         },
@@ -66,6 +84,9 @@ export const chatSession = {
         }
     },
     getters: {
+        chatSessionData: state => {
+          return state.chatSessionData;
+        },
         chatSessionList: state => {
             return state.chatSessionList;
         },

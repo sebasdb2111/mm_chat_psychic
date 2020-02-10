@@ -15,7 +15,7 @@ function load(component) {
 }
 
 const router = new VueRouter({
-  scrollBehavior: () => ({ x: 0, y: 0 }),
+  scrollBehavior: () => ({x: 0, y: 0}),
   mode: 'history',
   base: process.env.VUE_ROUTER_BASE,
   routes: [
@@ -23,13 +23,31 @@ const router = new VueRouter({
       path: '/',
       component: MyLayout,
       children: [
-        { path: '', title: 'pageChatList', component: PageChatList },
-        { path: '/auth', title: 'auth', component: PageAuth },
-        { path: '/chat/:chatSessionId', title: 'chat', component: PageChat },
-        { path: '*', component: load('Error404') }
+        {path: '', title: 'pageChatList', component: PageChatList},
+        {path: '/auth', title: 'auth', component: PageAuth},
+        {path: '/chat/:chatSessionId', title: 'chat', component: PageChat},
+        {path: '*', component: load('Error404')}
       ]
     }
   ]
+});
+
+router.beforeEach((to, from, next) => {
+  const loggedIn = !!localStorage.getItem('psychicToken');
+
+  if (to.fullPath === '/auth' && loggedIn) {
+    next('/');
+  }
+
+  if (to.fullPath === '/chat/*' && !loggedIn) {
+      next('/auth');
+  }
+
+  if (to.fullPath === '/' && !loggedIn) {
+      next('/auth');
+  }
+
+  next();
 });
 
 export default router;

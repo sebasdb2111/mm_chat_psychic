@@ -6,7 +6,7 @@ module.exports = function (ctx) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     boot: [
-      'firebase'
+      'websocket-client'
     ],
 
     css: [
@@ -14,7 +14,7 @@ module.exports = function (ctx) {
     ],
 
     extras: [
-      // 'ionicons-v4',
+      'ionicons-v4',
       // 'mdi-v3',
       // 'fontawesome-v5',
       // 'eva-icons',
@@ -26,7 +26,7 @@ module.exports = function (ctx) {
     ],
 
     framework: {
-      // iconSet: 'ionicons-v4',
+      iconSet: 'ionicons-v4',
       // lang: 'de', // Quasar language
 
       all: true, // --- includes everything; for dev only!

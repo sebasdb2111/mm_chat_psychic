@@ -6,9 +6,9 @@
     <q-toolbar class="bg-teal-3 text-white ">
       <q-toolbar-title>
         <q-avatar color="white" text-color="teal">
-          S<!--{{ chatSession.owner.firstName.charAt(0) }}-->
+          {{ customer.charAt(0) }}
         </q-avatar>
-        Sebas
+        {{ customer }}
       </q-toolbar-title>
     </q-toolbar>
     <div class="q-pa-md column col justify-end">
@@ -66,17 +66,69 @@
 	  	return {
 	  		newMessage: '',
 	  		showMessages: false,
-        messages: []
-	  	}
+        messages: [],
+        customer: ''
+      }
 	  },
+    async created() {
+      await this.bringConversation();
+      this.scrollToBottom();
+      await this.getChatSession(Number(this.$route.params.chatSessionId));
+      await this.customerName();
+
+      this.$socket.client.on('customer_send_message', async customerMessage => {
+        if (customerMessage.data.chatSession.id === Number(this.$route.params.chatSessionId))
+        {
+          const __ret = await this.getPsychicAndSender(customerMessage.data);
+          const name = __ret.name;
+          const bgColor = __ret.bgColor;
+
+          this.messages = [
+            ...this.messages,
+            {
+              id: customerMessage.data.id,
+              text: [customerMessage.data.message],
+              deleted: customerMessage.data.deleted,
+              stamp: customerMessage.data.createdAt,
+              sent: false,
+              name,
+              bgColor
+            }
+          ];
+          this.scrollToBottom();
+        }
+      });
+    },
+    mounted() {
+      this.getConversation(this.$route.params.chatSessionId);
+    },
 	  computed: {
 	  	...mapState('chatSession', ['conversation']),
 	  	...mapState('psychic', ['psychicDetails'])
 	  },
+    // watch: {
+    //   conversation: (val) => {
+    //     const conversation = this.mountConversation(val.data);
+    //     if (Object.keys(conversation).length) {
+    //       this.scrollToBottom();
+    //       setTimeout(() => {
+    //         // this.showMessages = true
+    //       }, 200)
+    //     }
+    //   }
+    // },
 	  methods: {
-	  	...mapActions('chatSession', ['getConversation', 'sendMessage']),
-	  	...mapActions('psychic', ['currentPsychic']),
+      ...mapActions('chatSession', ['getConversation', 'sendMessage', 'getChatSession']),
+      ...mapGetters('chatSession', ['chatSessionData']),
 	  	...mapGetters('psychic', ['psychicData']),
+      async customerName() {
+        const chatSessionData = await this.chatSessionData();
+        this.customer = `${chatSessionData.data.owner.firstName} ${chatSessionData.data.owner.lastName}`;
+      },
+      async bringConversation() {
+        const conversation = await this.getConversation(this.$route.params.chatSessionId);
+        await this.mountConversation(conversation.data);
+      },
       sendMessage(e) {
         e.preventDefault();
         this.$store
@@ -87,6 +139,8 @@
           .then(message => {
             const __ret = this.getPsychicAndSender(message.data);
             const name = __ret.name;
+
+            this.$socket.client.emit('psychic_send_message', message);
 
             this.messages = [
               ...this.messages,
@@ -100,6 +154,7 @@
                 bgColor: 'grey-3'
               }
             ];
+            this.scrollToBottom();
           })
           .catch(() => {
             this.$q.notify({
@@ -161,32 +216,17 @@
 
         return { sent, name, bgColor };
       },
-	  	clearMessage() {
-	  		this.newMessage = ''
-	  		this.$refs.newMessage.focus()
-	  	},
-	  	scrollToBottom() {
-	  		const pageChat = this.$refs.pageChat.$el
-	  		setTimeout(() => {
-		  		window.scrollTo(0, pageChat.scrollHeight)
-	  		}, 20);
-	  	}
-	  },
-	  watch: {
-      conversation: function(val) {
-        const conversation = this.mountConversation(val.data);
-        if (Object.keys(conversation).length) {
-	  			this.scrollToBottom()
-	  			setTimeout(() => {
-	  				// this.showMessages = true
-	  			}, 200)
-	  		}
-	  	}
-	  },
-	  mounted() {
-      this.getConversation(this.$route.params.chatSessionId);
-	  	this.currentPsychic();
-	  }
+      async clearMessage() {
+        this.newMessage = '';
+        this.$refs.newMessage.focus()
+      },
+      async scrollToBottom() {
+        const pageChat = this.$refs.pageChat.$el;
+        setTimeout(() => {
+          window.scrollTo(0, pageChat.scrollHeight)
+        }, 20);
+      }
+    }
 	}
 </script>
 
