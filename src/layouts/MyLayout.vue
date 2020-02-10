@@ -27,7 +27,7 @@
         />
         <q-btn
           v-if="isLogged"
-          @click="logout"
+          @click="closeSession"
           to="/auth"
           class="absolute-right q-pr-sm"
           no-caps
@@ -48,6 +48,9 @@
   import {mapActions, mapGetters} from 'vuex';
 
   export default {
+    created() {
+      this.$socket.client.emit('connect');
+    },
     computed: {
       isLogged() {
         return this.loggedIn();
@@ -55,7 +58,14 @@
     },
     methods: {
       ...mapActions('auth', ['logout']),
-      ...mapGetters('auth', ['loggedIn'])
+      ...mapGetters('auth', ['loggedIn']),
+      ...mapGetters('psychic', ['psychicData']),
+      async closeSession() {
+        await this.logout();
+        const psychicData = await this.psychicData();
+        this.$socket.client.emit('psychic_offline', psychicData);
+        this.$socket.client.emit('disconnect');
+      }
     }
   };
 </script>
