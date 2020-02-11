@@ -33,7 +33,7 @@
 							:name="msg.name"
 						>
 							<q-img
-								:src="msg.text"
+								:src="msg.text[0]"
 								spinner-color="white"
 								style="height: 140px; max-width: 150px"
 							/>
@@ -82,7 +82,6 @@
 				</q-form>
 			</q-toolbar>
 		</q-footer>
-
 		<q-dialog v-model="dialog">
 			<q-layout view="Lhh lpR fff" container class="bg-white">
 				<q-header reveal elevated>
@@ -95,7 +94,8 @@
 				<q-page-container>
 					<q-page padding>
 						<q-img
-							v-for="card in cards"
+							v-for="(card, key) in cards"
+							:key="key"
 							clickable
 							v-ripple
 							@click="sendCard(card.src)"
@@ -126,23 +126,11 @@
 				customer: '',
 				dialog: false,
 				position: 'top',
-				cards: [
-					{src: '../statics/cards/tarot-chariot.jpg', name: 'The chariot'},
-					{src: '../statics/cards/tarot-emperor.jpg', name: 'The emperor'},
-					{src: '../statics/cards/tarot-empress.jpg', name: 'The empress'},
-					{src: '../statics/cards/tarot-fool.jpg', name: 'The fool'},
-					{src: '../statics/cards/tarot-hermit.jpg', name: 'The hermit'},
-					{src: '../statics/cards/tarot-hierophant.jpg', name: 'The hierophant'},
-					{src: '../statics/cards/tarot-highpriestess.jpg', name: 'The high priestess'},
-					{src: '../statics/cards/tarot-justice.jpg', name: 'Justice'},
-					{src: '../statics/cards/tarot-lovers.jpg', name: 'The lovers'},
-					{src: '../statics/cards/tarot-magician.jpg', name: 'The magician'},
-					{src: '../statics/cards/tarot-strength.jpg', name: 'Strength'},
-					{src: '../statics/cards/tarot-wheeloffortune.jpg', name: 'Wheel of fortune'},
-				]
+				cards: []
 			}
 		},
 		async created() {
+			await this.renderCards();
 			await this.bringConversation();
 			this.scrollToBottom();
 			await this.getChatSession(Number(this.$route.params.chatSessionId));
@@ -291,6 +279,22 @@
 				setTimeout(() => {
 					window.scrollTo(0, pageChat.scrollHeight)
 				}, 20);
+			},
+			async renderCards() {
+				this.cards = [
+					{src: '../statics/cards/tarot-chariot.jpg', name: 'The chariot'},
+					{src: '../statics/cards/tarot-emperor.jpg', name: 'The emperor'},
+					{src: '../statics/cards/tarot-empress.jpg', name: 'The empress'},
+					{src: '../statics/cards/tarot-fool.jpg', name: 'The fool'},
+					{src: '../statics/cards/tarot-hermit.jpg', name: 'The hermit'},
+					{src: '../statics/cards/tarot-hierophant.jpg', name: 'The hierophant'},
+					{src: '../statics/cards/tarot-highpriestess.jpg', name: 'The high priestess'},
+					{src: '../statics/cards/tarot-justice.jpg', name: 'Justice'},
+					{src: '../statics/cards/tarot-lovers.jpg', name: 'The lovers'},
+					{src: '../statics/cards/tarot-magician.jpg', name: 'The magician'},
+					{src: '../statics/cards/tarot-strength.jpg', name: 'Strength'},
+					{src: '../statics/cards/tarot-wheeloffortune.jpg', name: 'Wheel of fortune'},
+				]
 			},
 			async sendCard(message) {
 				await this.postMessage(message, true);
