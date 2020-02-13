@@ -47,6 +47,7 @@
 
 			const chats = this.chatSessionList;
 			this.chats = chats.data;
+			this.$socket.client.emit('customers-online-ping');
 		},
 		watch: {
 			chatSessionList() {
@@ -66,6 +67,21 @@
 				this.$socket.client.on('customer_offline', customer => {
 					let indexOfChat = this.chats.findIndex(el => el.owner.id === customer.id);
 					delete(this.chats[indexOfChat].owner.status);
+					this.$set(this.chats, indexOfChat, this.chats[indexOfChat]);
+				});
+
+				// TODO: hay que mejorar esta iteracion
+				this.$socket.client.on('customers_online_list', customersOnline => {
+					const indexOfChat = this.chats.findIndex(chat => {
+						customersOnline.forEach(customer => {
+							if (customer.id === chat.owner.id) {
+								chat.owner.status = true;
+							}
+							else {
+								delete(chat.owner.status);
+							}
+						})
+					});
 					this.$set(this.chats, indexOfChat, this.chats[indexOfChat]);
 				});
 
