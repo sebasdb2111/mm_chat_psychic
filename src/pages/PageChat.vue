@@ -3,14 +3,20 @@
 		ref="pageChat"
 		class="page-chat flex column"
 	>
-		<q-toolbar class="bg-teal-3 text-white ">
-			<q-toolbar-title>
-				<q-avatar color="white" text-color="teal">
-					{{ customer.charAt(0) }}
-				</q-avatar>
-				{{ customer }}
-			</q-toolbar-title>
-		</q-toolbar>
+		<q-page-sticky expand position="top" style="z-index: 1">
+			<q-toolbar reveal class="bg-orange text-white">
+				<div class="row ">
+					<div class="col">
+						<q-toolbar-title>
+							<q-avatar color="white" text-color="orange">
+								{{ customer.charAt(0) }}
+							</q-avatar>
+							<span> {{ customer }}</span>
+						</q-toolbar-title>
+					</div>
+				</div>
+			</q-toolbar>
+		</q-page-sticky>
 		<div class="q-pa-md column col justify-end">
 			<q-infinite-scroll reverse>
 				<div
