@@ -5,7 +5,7 @@
 			separator>
 			<q-item-label header>Active Chats</q-item-label>
 			<q-item
-				v-for="(chatSession, key) in chats"
+				v-for="(chatSession, key) in chatListData"
 				:key="key"
 				:to="'/chat/' + chatSession.id"
 				clickable
@@ -23,7 +23,9 @@
 					</q-item-label>
 				</q-item-section>
 				<q-item-section side>
-					<p>{{ chatSession.psychic.status ? 'online' : 'offline' }}</p>
+					<p :class="chatSession.owner.status ? 'text-teal' : 'text-red'">
+						{{ chatSession.owner.status ? 'online' : 'offline' }}
+					</p>
 				</q-item-section>
 			</q-item>
 		</q-list>
@@ -35,34 +37,43 @@
 	import {convertIsoFormatWithHourAndMinutes} from '../servicies/date-utils'
 
 	export default {
-		async created() {
-			await this.chatSessions();
-			await this.activeChats();
-
-			const chats = await this.chatSessionList();
-
-			this.$socket.client.on('customer_online', customer => {
-				let chat = chats.data.findIndex(el => el.owner.id === customer.id);
-				chats.data[chat].owner.status = true;
-			});
-
-			this.$socket.client.on('customer_offline', customer => {
-				let chat = chats.data.findIndex(el => el.owner.id === customer.id);
-				chats.data[chat].owner.status = false;
-			})
-		},
 		data() {
 			return {
-				chats: []
+				chats: [],
+			}
+		},
+		async created() {
+			await this.chatSessions();
+
+			const chats = this.chatSessionList;
+			this.chats = chats.data;
+		},
+		watch: {
+			chatSessionList() {
+				const chats = this.chatSessionList;
+				this.chats = chats.data;
+			}
+		},
+		computed: {
+			...mapGetters('chatSession', ['chatSessionList']),
+			chatListData() {
+				this.$socket.client.on('customer_online', customer => {
+					let indexOfChat = this.chats.findIndex(el => el.owner.id === customer.id);
+					this.chats[indexOfChat].owner.status = true;
+					this.$set(this.chats, indexOfChat, this.chats[indexOfChat]);
+				});
+
+				this.$socket.client.on('customer_offline', customer => {
+					let indexOfChat = this.chats.findIndex(el => el.owner.id === customer.id);
+					delete(this.chats[indexOfChat].owner.status);
+					this.$set(this.chats, indexOfChat, this.chats[indexOfChat]);
+				});
+
+				return this.chats;
 			}
 		},
 		methods: {
 			...mapActions('chatSession', ['chatSessions']),
-			...mapGetters('chatSession', ['chatSessionList']),
-			async activeChats() {
-				const chats = await this.chatSessionList();
-				this.chats = chats.data;
-			},
 			convertIsoFormatWithHourAndMinutes(date) {
 				return convertIsoFormatWithHourAndMinutes(date);
 			}
