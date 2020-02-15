@@ -63,8 +63,9 @@
 			async closeSession() {
 				await this.logout();
 				const psychicData = await this.psychicData();
-				this.$socket.client.emit('psychic_offline', psychicData);
+
 				this.$socket.client.emit('disconnect');
+				this.$socket.client.emit('psychic_offline', psychicData);
 			}
 		}
 	};
